@@ -1,18 +1,30 @@
+//
 // server/websocketServer.js
+// 
 
 const WebSocket = require('ws');
 const server = new WebSocket.Server({ port: 8080 });
 
-server.on('connection', socket => {
-    console.log('A new client connected!');
-    
-    socket.on('message', message => {
-        console.log('Received: %s', message);
-        // You could trigger the addition of a v-expansion-panel here or send messages back
+server.on('connection', (socket, req) => {
+    const clientIp = req.socket.remoteAddress;
+    console.log(`New client connected: ${clientIp}`);
+
+    // Send a connection notification message immediately
+    const message = JSON.stringify({
+        type: 'newClient',
+        ip: clientIp,
+        message: 'Connection established'
+    });
+    socket.send(message); // Send notification right after connection
+
+    socket.on('message', (message) => {
+        console.log('Received:', message);
+        // Echo the received message back to the client
+        socket.send(JSON.stringify({ type: 'echo', payload: message }));
     });
 
     socket.on('close', () => {
-        console.log('Client disconnected');
+        console.log(`Client ${clientIp} disconnected`);
     });
 
     socket.on('error', error => {

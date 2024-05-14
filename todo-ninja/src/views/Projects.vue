@@ -1,10 +1,12 @@
 <template>
   <div class="projects">
+    <button @click="addProject('127.0.0.1')">Add Test Project</button>
+
     <h1 class="subheading grey--text">Projects</h1>
 
     <v-container class="my-5">
       <v-expansion-panel>
-        <v-expansion-panel-content v-for="project in myProjects" :key="project.title">
+        <v-expansion-panel-content v-for="project in projects" :key="project.title">
           <div slot="header" class="py-1">{{ project.title }}</div>
           <v-card>
             <v-card-text class="px-4 grey--text">
@@ -15,7 +17,6 @@
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-container>
-    
   </div>
 </template>
 
@@ -23,20 +24,54 @@
 export default {
   data() {
     return {
-      projects: [
-        { title: 'Design a new website', person: 'The Net Ninja', due: '1st Jan 2019', status: 'ongoing', content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt consequuntur eos eligendi illum minima adipisci deleniti, dicta mollitia enim explicabo fugiat quidem ducimus praesentium voluptates porro molestias non sequi animi!'},
-        { title: 'Code up the homepage', person: 'Chun Li', due: '10th Jan 2019', status: 'complete', content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt consequuntur eos eligendi illum minima adipisci deleniti, dicta mollitia enim explicabo fugiat quidem ducimus praesentium voluptates porro molestias non sequi animi!'},
-        { title: 'Design video thumbnails', person: 'Ryu', due: '20th Dec 2018', status: 'complete', content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt consequuntur eos eligendi illum minima adipisci deleniti, dicta mollitia enim explicabo fugiat quidem ducimus praesentium voluptates porro molestias non sequi animi!'},
-        { title: 'Create a community forum', person: 'Gouken', due: '20th Oct 2018', status: 'overdue', content: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sunt consequuntur eos eligendi illum minima adipisci deleniti, dicta mollitia enim explicabo fugiat quidem ducimus praesentium voluptates porro molestias non sequi animi!'},
-      ]
+      projects: [],
+      ws: null,
+    };
+  },
+  mounted() {
+    this.connectWebSocket();
+  },
+  methods: {
+    connectWebSocket() {
+      this.ws = new WebSocket('ws://localhost:8080');
+
+      this.ws.onopen = () => {
+        console.log('Connection opened');
+      };
+
+      this.ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'newClient') {
+          this.addProject(data.ip, data.message);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket Error:', error);
+      };
+
+      this.ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+    },
+    addProject(ip, message) {
+      this.projects.push({
+        title: `Client: ${ip}`,
+        person: ip,
+        due: 'N/A',
+        status: 'connected',
+        content: message
+      });
     }
   },
-  computed: {
-    myProjects() {
-      return this.projects.filter(project => {
-        return project.person === 'The Net Ninja' && project.status != 'complete'
-      })
+  beforeDestroy() {
+    if (this.ws) {
+      this.ws.close();
     }
   }
 }
 </script>
+
+<style scoped>
+/* Add your component-specific styles here */
+</style>
