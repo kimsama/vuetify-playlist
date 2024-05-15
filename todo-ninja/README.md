@@ -24,3 +24,13 @@ npm run test
 ```
 npm run lint
 ```
+
+
+## Websocket Server
+
+```
+cd server
+npm install
+npm run dev
+```
+
