@@ -1,5 +1,18 @@
 # todo-ninja
 
+
+Run web-socket server app first under `server/websocketServer.js`
+
+
+## Websocket Server App
+
+```
+cd server
+npm install
+npm run dev
+```
+
+
 ## Project setup
 ```
 npm install
@@ -26,11 +39,12 @@ npm run lint
 ```
 
 
-## Websocket Server
+## Test Client NodeJS App
+
+There is a test client which can be found under `test-client` folduer.
 
 ```
-cd server
+cd test-client
 npm install
 npm run dev
 ```
-
