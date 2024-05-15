@@ -3,17 +3,16 @@
 //
 
 const WebSocket = require('ws');
+const ws = new WebSocket('ws://localhost:8080');
 
-const ws = new WebSocket('ws://10.6.50.50:8080/ws');
-
-ws.on('open', function open() {
-  console.log('Connected');
+ws.on('open', () => {
+  // Send identification message to the server
+  ws.send(JSON.stringify({
+    type: 'identify',
+    clientType: 'normal-client'
+  }));
 });
 
-ws.on('message', function incoming(data) {
-  console.log(data);
-});
-
-ws.on('error', function error(err) {
-  console.error('WebSocket error:', err);
+ws.on('message', (data) => {
+  console.log('Message from server:', data);
 });

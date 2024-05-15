@@ -37,12 +37,29 @@ export default {
 
       this.ws.onopen = () => {
         console.log('Connection opened');
+        // Send identification message to the server
+        this.ws.send(JSON.stringify({
+          type: 'identify',
+          clientType: 'monitoring-client'
+        }));        
       };
 
       this.ws.onmessage = (event) => {
+        // Handle messages from the server
         const data = JSON.parse(event.data);
-        if (data.type === 'newClient') {
-          this.addProject(data.ip, data.message);
+        if (data.type === 'updateClients') {
+          // Reset the projects list on each update
+          //this.projects = []; // Clear previous data or handle updates differently if needed
+          //data.clients.forEach(client => {
+          //  this.addProject(client.ip, `Client connected with IP: ${client.ip}`);
+          //});
+          this.projects = data.clients.map(client => ({
+            title: `Client: ${client.ip}`,
+            person: client.id, // Using client.id as a key
+            due: 'N/A',
+            status: 'connected',
+            content: `Client connected with IP: ${client.ip}`
+          }));
         }
       };
 
@@ -53,17 +70,19 @@ export default {
       this.ws.onclose = () => {
         console.log('WebSocket connection closed');
       };
-    },
-    addProject(ip, message) {
-      this.projects.push({
-        title: `Client: ${ip}`,
-        person: ip,
-        due: 'N/A',
-        status: 'connected',
-        content: message
-      });
     }
   },
+  /*
+  addProject(ip, message) {
+    this.projects.push({
+      title: `Client: ${ip}`,
+      person: ip,
+      due: 'N/A',
+      status: 'connected',
+      content: message
+    });
+  },
+  */
   beforeDestroy() {
     if (this.ws) {
       this.ws.close();
